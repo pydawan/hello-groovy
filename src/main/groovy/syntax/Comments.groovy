@@ -1,5 +1,7 @@
 #!/usr/bin/env groovy
 
+// #!/usr/bin/env groovy Shebang line
+
 // 1. Single line comment
 
 // a standalone single line comment
@@ -34,5 +36,3 @@ class Person {
     }
 }
 
-// Shebang line
-// #!/usr/bin/env groovy
