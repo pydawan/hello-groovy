@@ -34,7 +34,7 @@ assert letters[-1] == 'd' // access the last element of the list with a negative
 assert letters[-2] == 'c'
 
 letters[2] = 'C' // use an assignment to set a new value for the third element of the list.
-assert letters[2] == 'C
+assert letters[2] == 'C'
 
 letters << 'e' // use the << leftShift operator to append an element at the end of the list.
 assert letters[4] == 'e'
