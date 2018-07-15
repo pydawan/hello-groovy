@@ -257,9 +257,11 @@ def reference = this.&doSomething
 assert reference('foo') == 'FOO'
 assert reference(123) == 246
 
-// Regular Expression Operators
+// =============================
+// REGULAR EXPRESSION OPERATORS
+// =============================
 
-// Operador (Pattern operator)
+// PATTERN OPERATOR
 // O operador pattern (~) fornece uma maneira simples de criar uma instância de java.util.regex.Pattern:
 
 def p = ~/foo/
@@ -272,7 +274,7 @@ p = ~$/dollar/slashy $ string/$
 pattern = p
 p = ~"${pattern}"
 
-// Operador find (Find operator)
+// FIND OPERATOR
 // Usamos o operador find, =~ para construir um java.util.regex.Matcher que é um comparador que verifica a correspondência entre padrões textuais.
 
 def text = "some text to match"
@@ -283,7 +285,7 @@ if (!m) {
     throw new RuntimeException("Oops, text not found!")
 }
 
-// Operador match (Match operator)
+// MATCH OPERATOR
 
 m = text ==~ /match/
 assert m instanceof Boolean
@@ -292,7 +294,7 @@ if (m) {
 }
 
 
-// Operador spread (Spread operator)
+// SPREAD OPERATOR
 
 /* O Spread Operator (*.) é usado para invocar uma ação em todos os itens de um objeto agregado. Ele é equivalente a chamada da
  * ação em cada item e a coletagem do resultado em uma lista.
@@ -355,14 +357,214 @@ assert function(*args) == 26
 args = [4]
 assert function(*args, 5, 6) == 26
 
-// Spread list elements
+// SPREAD LIST ELEMENTS
 def items = [4, 5]
 list = [1, 2, 3, *items, 6]
 assert list == [1, 2, 3, 4, 5, 6]
 
-// Spread map elements
+// SPREAD MAP ELEMENTS
 def m1 = [c: 3, d: 4]
 def map = [a: 1, b: 2, *: m1]
 assert map == [a: 1, b: 2, c: 3, d: 4]
+
+// RANGE OPERATOR
+
+def range = 0..5
+assert (0..5).collect() == [0, 1, 2, 3, 4, 5] // IntRange with inclusive bounds
+assert (0..<5).collect() == [0, 1, 2, 3, 4] // IntRange with exclusive upper bound
+assert (0..5) instanceof List // groovy.lang.Range implements the List interface
+assert (0..5).size() == 6
+
+/* 
+ * Ranges implementation is lightweight, meaning that only the lower and upper bounds are stored. You can create a range
+ * from any Comparable object that has next() and previous() methods to determine the next/previous item in the range.
+ */
+assert ('a'..'d').collect() == ['a', 'b', 'c', 'd']
+
+
+// SPACESHIP OPERATOR
+
+// O spaceship operator delega para o método compareTo:
+
+assert (1 <=> 1) == 0
+assert (1 <=> 2) == -1
+assert (2 <=> 1) == 1
+assert ('a' <=> 'z') == -1
+
+
+// SUBSCRIPT OPERATOR
+
+// O subscript operator é uma notação abreviada para getAt ou putAt, dependendo se você o encontra do lado esquerdo ou direito de uma atribuição.
+
+list = [0, 1, 2, 3, 4]
+assert list[2] == 2
+list[2] = 4
+assert list[0..2] == [0, 1, 4]
+list[0..2] = [6, 6, 6]
+assert list == [6, 6, 6, 3, 4]
+
+class Usuario {
+    Long id
+    String nome
+
+    def getAt(int i) {
+        switch (i) {
+            case 0: return id
+            case 1: return nome
+        }
+        throw new IllegalArgumentException("No such element $i")
+    }
+
+    void putAt(int i, def value) {
+        switch (i) {
+            case 0: id = value; return
+            case 1: nome = value; return
+        }
+    }
+}
+
+def usuario = new Usuario(id: 1, nome: 'Alex')
+assert usuario[0] == 1
+assert usuario[1] == 'Alex'
+usuario[1] = 'Bob'
+
+// MEMBERSHIP OPERATOR
+
+/* The membership operator (in) is equivalent to calling the isCase method. In the context of a List, it i sequivalent to
+ * calling contains, like in the following example:
+ */
+
+list = ['Grace', 'Rob', 'Emmy']
+assert('Emmy' in list) // equivalent to calling list.contains('Emmy') or list.isCase('Emmy')
+
+// IDENTITY OPERATOR
+
+/* In Groovy, using == to test equality is different from using the same operator in Java. In Groovy, it is calling equals. If you
+ * want to compare reference equality, you should use is like in the following example:
+ */
+
+def list1 = ['Groovy 1.8', 'Groovy 2.0', 'Groovy 2.3']
+def list2 = ['Groovy 1.8', 'Groovy 2.0', 'Groovy 2.3']
+assert list1 == list2
+assert !list1.is(list2)
+
+// COERCION OPERATOR
+
+/* The coercion operator (as) is a variant of casting. Coercion converts object from one type to another without them being
+ * compatible for assignment. Let's take an example:
+ */
+
+Integer x = 123
+String s = (String) x // Integer is not assignable to a String, so it will produce a ClassCastException at runtime.
+
+// This can be fixed by using coercion instead:
+Integer x1 = 123
+String s1 = x as String // Integer is not assignable to a String, bu use of as will coerce it to a String.
+
+/*
+ * When an object is coerced into another, unless the target type is the same as the source type, coercion wil lreturn a new
+ * object. The rules of coercion differ depending on the source and target types, and coercion may fail if no conversion rules
+ * are found. Custom conversion rules may be implemented thanks to the asType method:
+ */
+
+/*
+
+class Identifiable {
+    String name
+}
+
+class User {
+    Long id
+    String name
+
+    def asType(Class target) {
+        if (target == Identifiable) {
+            return new Identifiable(name: name)
+        }
+        throw new ClassCastException("User cannot be coerced into $target")
+    }
+}
+
+def u = new User(name: 'Xavier')
+def p = u as Identifiable
+assert p instanceof Identifiable
+assert !(p instanceof User)
+
+*/
+
+// DIAMOND OPERATOR
+
+/* The diamond operator (<>) is a syntatic sugar only operator added to support compatibility with the operator of the
+ * same name in Java 7. It is used to indicate that generic types should be inferred from the declaration:
+ */
+
+List<String> strings = new LinkedList<>()
+
+/* In dynamic Grovy, this is totally unused. In statically type checked Groovy, it is also optional since the Groovy type checker
+ * performs type inference wheter this operator is present or not.
+ */
+
+// CALL OPERATOR
+
+/* The call operator () is used to call a method named call implicitly. For any obbject which defines a call mehtod, you can
+ * omit the .call() part and use the call operator instead:
+ */
+
+class MyCallable {
+    int call(int x) { // MyCallable defines a mehtod named call. Note that it doesn't nedd to implement java.util.concurrent.Callable
+        2 * x
+    }
+}
+
+def mc = new MyCallable()
+assert mc.call(2) == 4 // we can call the method using the classic method call syntax
+assert mc(2) == 4 // or we can omit .call thanks to the call operator
+
+
+// OPERATOR PRECEDENCE
+
+// OPERATOR OVERLOADING
+
+class Bucket {
+    int size
+
+    Bucket(int size) { this.size = size }
+
+    Bucket plus(Bucket other) {
+        return new Bucket(this.size + other.size)
+    }
+}
+
+def b1 = new Bucket(4)
+def b2 = new Bucket(11)
+assert (b1 + b2).size == 15
+
+// =============================================
+//   OPERATOR           METHOD
+// =============================================
+//   +              a.plus(b)
+//   -              a.minus(b)
+//   *              a.multiply(b)
+//   /              a.div(b)
+//   %              a.mod(b)
+//   **             a.power(b)
+//   |              a.or(b)
+//   &              a.and(b)
+//   ^              a.xor(b)
+//   as             a.asType(b)
+//   a()            a.call()
+//   a[b]           a.getAt(b)
+//   a[b] = c       a.putAt(b, c)
+//   a in b         b.isCase(a)
+//   <<             a.leftShift(b)
+//   >>             a.rightShift(b)
+//   >>>            a.rightShiftUnsigned(b)
+//   ++             a.next()
+//   --             a.previous()
+//   +a             a.positive()
+//   -a             a.negative()
+//   ~a             a.bitwiseNegate()
+// ============================================
+
 
 
